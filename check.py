@@ -4,6 +4,42 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
 from bs4 import BeautifulSoup
+import pycountry
+
+def get_country_from_string(text):
+    countries = [country.name for country in pycountry.countries]
+    countries.extend([
+        'Azores',
+        'Bolivia',
+        'Borneo',
+        'Cape Verde',
+        'Cretan Islanders',
+        'Czech Republic',
+        'England',
+        'Gaza',
+        'Iran',
+        'IvoryCoast',
+        'Macedonia',
+        'Madeira',
+        'Russia',
+        'Sao Tome Island',
+        'Scotland',
+        'South Korea',
+        'Tanzania',
+        'Taiwan',
+        'Turkey',
+        'Trinidad',
+        'USA',
+        'Venezuela',
+        'Vietnam',
+        'Wales',
+        'Western Samoa'])
+    
+    for country in countries:
+        if text.lower().startswith(country.lower()):
+            return country
+
+    return None
 
 def get_populations():
     url = "https://www.allelefrequencies.net/hla/classical-allele-frequency-search/"
@@ -39,6 +75,7 @@ def get_populations():
         # Select each population option one by one
         for element in table.select("option"):
             population = element.get_text(strip = True)
+            print(get_country_from_string(population))
             file.write(population + "\n")
 
     # Handle errors that occur when opening or writing to the file
