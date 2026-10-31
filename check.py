@@ -6,6 +6,7 @@ from selenium.common.exceptions import TimeoutException
 from bs4 import BeautifulSoup
 import pycountry
 
+# Extracts the country name from the given option
 def get_country_from_string(text):
     countries = [country.name for country in pycountry.countries]
     countries.extend([
@@ -18,7 +19,8 @@ def get_country_from_string(text):
         'England',
         'Gaza',
         'Iran',
-        'IvoryCoast',
+        'Ivory Coast',
+        'Kosovo',
         'Macedonia',
         'Madeira',
         'Russia',
@@ -40,6 +42,24 @@ def get_country_from_string(text):
             return country
 
     return None
+
+# Extracts the population sample value, including parentheses, from the given option
+def get_population_sample_value_from_string(text):
+    return "(" + text.rsplit("(", 1)[1]
+
+# Parses the given option and returns a tuple in the format (country, population_name, population_sample)
+def parse_option(text):
+    # (1st part) Extract the country name
+    country = get_country_from_string(text)
+
+    # (3rd part) Extract the population sample value
+    population_sample = get_population_sample_value_from_string(text)
+    n_value = "".join(character for character in population_sample if character.isdigit())
+
+    # (2nd part) Extract the population name by removing the country name and population sample from the original text
+    population_test = text.replace(country, "").replace(population_sample, "").strip()
+    
+    return (country, population_test, n_value)
 
 def get_populations():
     url = "https://www.allelefrequencies.net/hla/classical-allele-frequency-search/"
@@ -75,8 +95,10 @@ def get_populations():
         # Select each population option one by one
         for element in table.select("option"):
             population = element.get_text(strip = True)
-            print(get_country_from_string(population))
-            file.write(population + "\n")
+            if (population == "All"):
+                continue
+            
+            print(parse_option(population))
 
     # Handle errors that occur when opening or writing to the file
     except OSError as e:
