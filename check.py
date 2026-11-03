@@ -6,6 +6,9 @@ from selenium.common.exceptions import TimeoutException
 from bs4 import BeautifulSoup
 import pycountry
 
+CONST_EMPTY_POPULATION_TEST = "NONAME"
+api_populations = {}
+
 # Extracts the country name from the given option
 def get_country_from_string(text):
     countries = [country.name for country in pycountry.countries]
@@ -43,6 +46,20 @@ def get_country_from_string(text):
 
     return None
 
+# Append a parsed population to the api_populations dictionary
+def api_populations_append(country, population_test, n_value):
+    # Check whether the country exists in the dictionary, create it if it does not
+    if country not in api_populations:
+        api_populations[country] = {
+            "populations": []
+        }
+
+    # Append the population name and sample size to the country's populations list
+    api_populations[country]["populations"].append({
+        "name" : CONST_EMPTY_POPULATION_TEST if population_test == "" else population_test,
+        "n" : n_value
+    })
+
 # Extracts the population sample value, including parentheses, from the given option
 def get_population_sample_value_from_string(text):
     return "(" + text.rsplit("(", 1)[1]
@@ -58,7 +75,7 @@ def parse_option(text):
 
     # (2nd part) Extract the population name by removing the country name and population sample from the original text
     population_test = text.replace(country, "").replace(population_sample, "").strip()
-    
+
     return (country, population_test, n_value)
 
 def get_populations():
@@ -97,8 +114,12 @@ def get_populations():
             population = element.get_text(strip = True)
             if (population == "All"):
                 continue
-            
-            print(parse_option(population))
+
+            # Step 1: Parse the selected option
+            (country, population_test, n_value) = parse_option(population)
+
+            # Step 2: Append the parsed population to the dictionary
+            api_populations_append(country, population_test, n_value)
 
     # Handle errors that occur when opening or writing to the file
     except OSError as e:
