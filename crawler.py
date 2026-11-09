@@ -10,6 +10,8 @@ import json
 CONST_EMPTY_POPULATION_TEST = "NONAME"
 api_populations = {}
 
+hla_path = "local-db/hla_info.json"
+
 # Extracts the country name from the given option
 def get_country_from_string(text):
     countries = [country.name for country in pycountry.countries]
@@ -82,7 +84,6 @@ def parse_option(text):
 # Populate the local-db directory with country population data in JSON format
 def get_populations():
     url = "https://www.allelefrequencies.net/hla/classical-allele-frequency-search/"
-    hla_path = "local-db/hla_info.json"
 
     options = Options()
     options.binary_location = (
