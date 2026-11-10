@@ -3,11 +3,11 @@ import os
 import json
 import requests
 
-def api_url_test(url, retardinjo):
+def api_url_test(url, test):
     request = requests.Request(
         "GET",
         url,
-        params=retardinjo
+        params=test
     )
     prepared_request = request.prepare()
 
@@ -24,13 +24,12 @@ def api_country_population(country, population_id):
     with open(crawler.hla_path, "r", encoding="utf-8") as file:
         api_from_file = json.load(file)
 
-
-    print(api_from_file.get(country))
-
     population_name = api_from_file.get(country)["populations"][population_id]["name"]
-    print(population_name)
-
-    api_value = country + " " + population_name
+    if population_name == "NONAME":
+        api_value = country
+    else:
+        api_value = country + " " + population_name
+    
     params = {
         "country" : country,
         "population" : f"{api_value}"
@@ -38,9 +37,16 @@ def api_country_population(country, population_id):
 
     api_url_test(allele_frequency_endpoint, params)
 
+def input_validation(input):
+    if input and not input.isalpha():
+        return None
+
+    if not input[0].isupper():
+        input = input.capitalize()
+
+    return input
+
+
+
 # response = requests.get(allele_frequency_endpoint, params=params)
 # data = response.json()
-
-country_input = input("Enter input here: ")
-array_id = int(input("Which one you want to take out? "))
-api_country_population(country_input, array_id)
